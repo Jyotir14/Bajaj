@@ -1,0 +1,74 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import './App.css';
+
+function App() {
+  const [inputData, setInputData] = useState('');
+  const [response, setResponse] = useState(null);
+  const [error, setError] = useState(null);
+  const [filterOptions, setFilterOptions] = useState([]);
+
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post('https://your-backend-api.com/bfhl', JSON.parse(inputData));
+      setResponse(res.data);
+      setError(null);
+    } catch (err) {
+      setError('Invalid JSON or API error');
+      setResponse(null);
+    }
+  };
+
+  const handleFilterChange = (event) => {
+    const { options } = event.target;
+    const selectedOptions = [];
+    for (let i = 0, l = options.length; i < l; i += 1) {
+      if (options[i].selected) {
+        selectedOptions.push(options[i].value);
+      }
+    }
+    setFilterOptions(selectedOptions);
+  };
+
+  const renderFilteredResponse = () => {
+    if (!response) return null;
+    const filteredResponse = {};
+    if (filterOptions.includes('Alphabets')) filteredResponse.alphabets = response.alphabets;
+    if (filterOptions.includes('Numbers')) filteredResponse.numbers = response.numbers;
+    if (filterOptions.includes('Highest alphabet')) filteredResponse.highest_alphabet = response.highest_alphabet;
+
+    return (
+      <pre>{JSON.stringify(filteredResponse, null, 2)}</pre>
+    );
+  };
+
+  return (
+    <div className="App">
+      <h1>BFHL Frontend</h1>
+      <textarea
+        rows="4"
+        cols="50"
+        value={inputData}
+        onChange={(e) => setInputData(e.target.value)}
+        placeholder='Enter JSON data here...'
+      />
+      <br />
+      <button onClick={handleSubmit}>Submit</button>
+      {error && <p className="error">{error}</p>}
+      {response && (
+        <>
+          <h2>Response</h2>
+          <label htmlFor="filter">Choose what to display:</label>
+          <select id="filter" multiple={true} onChange={handleFilterChange}>
+            <option value="Alphabets">Alphabets</option>
+            <option value="Numbers">Numbers</option>
+            <option value="Highest alphabet">Highest alphabet</option>
+          </select>
+          {renderFilteredResponse()}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default App;
