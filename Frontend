@@ -1,0 +1,49 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const App = () => {
+    const [jsonInput, setJsonInput] = useState('');
+    const [response, setResponse] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
+    const handleSubmit = async () => {
+        try {
+            const validJson = JSON.parse(jsonInput);
+            const res = await axios.post('https://your-backend-url.com/bfhl', validJson);
+            setResponse(res.data);
+        } catch (error) {
+            alert('Invalid JSON or error in processing');
+        }
+    };
+
+    const renderResponse = () => {
+        if (!response) return null;
+        return (
+            <div>
+                {selectedOptions.includes('Numbers') && <p>Numbers: {response.numbers.join(', ')}</p>}
+                {selectedOptions.includes('Alphabets') && <p>Alphabets: {response.alphabets.join(', ')}</p>}
+                {selectedOptions.includes('Highest alphabet') && <p>Highest Alphabet: {response.highest_alphabet}</p>}
+            </div>
+        );
+    };
+
+    return (
+        <div>
+            <input
+                type="text"
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                placeholder='Enter JSON input'
+            />
+            <button onClick={handleSubmit}>Submit</button>
+            <select multiple onChange={(e) => setSelectedOptions(Array.from(e.target.selectedOptions, option => option.value))}>
+                <option value="Numbers">Numbers</option>
+                <option value="Alphabets">Alphabets</option>
+                <option value="Highest alphabet">Highest Alphabet</option>
+            </select>
+            {renderResponse()}
+        </div>
+    );
+};
+
+export default App;
